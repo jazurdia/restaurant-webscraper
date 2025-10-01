@@ -1,0 +1,14 @@
+[
+  {
+    "url": "https://www.google.com/maps/place/Restaurant+Name/@40.7614,-73.9799,17z/...",
+    "name": "Restaurant Name",
+    "neighborhood": "Upper East Side",
+    "cuisine_type": "Italian"
+  },
+  {
+    "url": "https://www.google.com/maps/place/Another+Restaurant/@40.7656,-73.9877,17z/...",
+    "name": "Another Restaurant",
+    "neighborhood": "Upper East Side",
+    "cuisine_type": "Japanese"
+  }
+]
