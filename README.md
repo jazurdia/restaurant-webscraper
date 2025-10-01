@@ -255,9 +255,9 @@ class ApifyMultiAccountScraper:
 - **Angel Castellanos** — 21700
 - **Diego Morales** — 21146
 
-**Curso**: Inteligencia Artificial Responsable  
+**Curso**: Responsable AI  
 **Institución**: Universidad del Valle de Guatemala  
-**Fecha**: Enero 2025
+**Fecha**: Septiembre 2025
 
 ---
 
