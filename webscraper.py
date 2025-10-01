@@ -7,6 +7,7 @@ Updated with:
 - Validated field names from Apify compass/google-maps-reviews-scraper
 - Robust error handling with retries
 - Proper logging and progress tracking
+- Automatic token exhaustion handling
 """
 
 from apify_client import ApifyClient
@@ -33,6 +34,8 @@ class ApifyMultiAccountScraper:
     Manages multiple Apify API tokens to maximize free tier credits
     Each free account gets $5 credit = ~10,000 reviews at $0.50 per 1,000
     With 4 accounts, you can scrape 40,000+ reviews for free
+    
+    Automatically switches to next token when one runs out of credits
     """
     
     # Validated field names from Apify compass/google-maps-reviews-scraper output
@@ -67,25 +70,114 @@ class ApifyMultiAccountScraper:
         self.clients = [ApifyClient(token) for token in api_tokens]
         self.all_reviews = []
         self.max_retries = max_retries
+        self.tokens_exhausted = set()  # Track tokens that ran out of credits
         
         logger.info(f"Initialized with {len(api_tokens)} Apify accounts")
         logger.info(f"Estimated capacity: ~{len(api_tokens) * 10000} reviews")
         logger.info(f"Max retries per request: {max_retries}")
     
-    def get_next_client(self) -> ApifyClient:
+    def check_token_credits(self, client: ApifyClient, token_index: int) -> bool:
         """
-        Round-robin through API tokens to distribute usage
+        Check if a token still has available credits
+        
+        Args:
+            client: ApifyClient instance
+            token_index: Index of the token being checked
+            
+        Returns:
+            True if token has credits, False otherwise
         """
-        client = self.clients[self.current_token_index]
-        token_index = self.current_token_index
-        self.current_token_index = (self.current_token_index + 1) % len(self.clients)
-        return client, token_index
+        try:
+            user_info = client.user().get()
+            usage = user_info.get('usage', {})
+            available_credits = usage.get('availableCredits', 0)
+            
+            logger.info(f"Account #{token_index + 1} has ${available_credits:.2f} credits remaining")
+            
+            if available_credits <= 0.1:  # Less than 10 cents remaining
+                logger.warning(f"Account #{token_index + 1} has insufficient credits (${available_credits:.2f})")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error checking credits for account #{token_index + 1}: {e}")
+            # If we can't check, assume it has credits and let it fail naturally
+            return True
+    
+    def get_next_available_client(self, check_credits: bool = False) -> Optional[tuple]:
+        """
+        Get next client that still has credits available
+        Skips exhausted tokens automatically
+        
+        Args:
+            check_credits: If True, actively checks credits before returning client
+                          If False, only skips known exhausted tokens (faster)
+        
+        Returns:
+            Tuple of (client, token_index) or None if all tokens exhausted
+        """
+        attempts = 0
+        max_attempts = len(self.clients)
+        
+        while attempts < max_attempts:
+            # Skip exhausted tokens
+            if self.current_token_index in self.tokens_exhausted:
+                logger.info(f"Skipping account #{self.current_token_index + 1} (exhausted)")
+                self.current_token_index = (self.current_token_index + 1) % len(self.clients)
+                attempts += 1
+                continue
+            
+            client = self.clients[self.current_token_index]
+            token_index = self.current_token_index
+            
+            # Only check credits if explicitly requested or if this is a retry
+            if check_credits:
+                if self.check_token_credits(client, token_index):
+                    # Move to next token for next request (round-robin)
+                    self.current_token_index = (self.current_token_index + 1) % len(self.clients)
+                    return client, token_index
+                else:
+                    # Mark this token as exhausted
+                    self.tokens_exhausted.add(token_index)
+                    logger.warning(f"Account #{token_index + 1} marked as exhausted")
+                    self.current_token_index = (self.current_token_index + 1) % len(self.clients)
+                    attempts += 1
+            else:
+                # Trust that token is good, return immediately
+                self.current_token_index = (self.current_token_index + 1) % len(self.clients)
+                return client, token_index
+        
+        # All tokens exhausted
+        logger.error("ALL API TOKENS EXHAUSTED - No more credits available")
+        return None
     
     def _safe_get_field(self, item: Dict, field: str, default=None):
         """
         Safely extract field from item dict with fallback to None
         """
         return item.get(field, default)
+    
+    def _is_credit_error(self, error_message: str) -> bool:
+        """
+        Check if error is related to insufficient credits
+        
+        Args:
+            error_message: Error message from Apify
+            
+        Returns:
+            True if error is credit-related
+        """
+        credit_error_keywords = [
+            'insufficient credits',
+            'not enough credits',
+            'credit limit',
+            'payment required',
+            'quota exceeded'
+        ]
+        
+        error_lower = str(error_message).lower()
+        return any(keyword in error_lower for keyword in credit_error_keywords)
     
     def scrape_restaurant_reviews(
         self,
@@ -98,6 +190,7 @@ class ApifyMultiAccountScraper:
     ) -> List[Dict]:
         """
         Scrape reviews from a single restaurant using Apify with retry logic
+        Automatically switches tokens when one runs out of credits
         
         Args:
             place_url: Google Maps URL of the restaurant
@@ -115,21 +208,29 @@ class ApifyMultiAccountScraper:
         logger.info("=" * 60)
         
         # Configure the scraper input
-        # Using compass/google-maps-reviews-scraper (official actor)
         run_input = {
             "startUrls": [{"url": place_url}],
             "maxReviews": max_reviews,
             "reviewsSort": sort_by,
             "language": "en",
-            "personalData": False,  # Don't scrape personal reviewer data
-            "maxImages": 0,  # Don't need images for text analysis
+            "personalData": False,
+            "maxImages": 0,
         }
         
-        # Retry logic
+        # Retry logic with automatic token switching
         for attempt in range(self.max_retries):
             try:
                 # Get next available client
-                client, token_index = self.get_next_client()
+                # Only check credits on first attempt or after an error
+                check_credits_now = (attempt > 0)
+                client_info = self.get_next_available_client(check_credits=check_credits_now)
+                
+                if client_info is None:
+                    logger.error("Cannot continue - all tokens exhausted")
+                    logger.error(f"Failed to scrape {restaurant_name}")
+                    return []
+                
+                client, token_index = client_info
                 logger.info(f"Attempt {attempt + 1}/{self.max_retries} using account #{token_index + 1}")
                 
                 # Run the Actor and wait for completion
@@ -183,7 +284,24 @@ class ApifyMultiAccountScraper:
                 return reviews_data
                 
             except ApifyApiError as e:
-                logger.error(f"Apify API error on attempt {attempt + 1}: {e}")
+                error_msg = str(e)
+                logger.error(f"Apify API error on attempt {attempt + 1}: {error_msg}")
+                
+                # Check if this is a credit exhaustion error
+                if self._is_credit_error(error_msg):
+                    logger.warning(f"Account #{token_index + 1} ran out of credits")
+                    self.tokens_exhausted.add(token_index)
+                    
+                    # Check if we have other tokens available
+                    if len(self.tokens_exhausted) >= len(self.clients):
+                        logger.error("All tokens exhausted - cannot continue")
+                        return []
+                    
+                    logger.info("Switching to next available token...")
+                    # Don't count this as a retry, just try with next token
+                    continue
+                
+                # For other errors, do normal retry logic
                 if attempt < self.max_retries - 1:
                     wait_time = 2 ** attempt
                     logger.info(f"Retrying in {wait_time} seconds...")
@@ -213,6 +331,7 @@ class ApifyMultiAccountScraper:
     ) -> List[Dict]:
         """
         Scrape reviews from multiple restaurants
+        Automatically handles token exhaustion
         
         Args:
             restaurants: List of restaurant dictionaries with keys:
@@ -239,6 +358,12 @@ class ApifyMultiAccountScraper:
         for i, restaurant in enumerate(restaurants):
             logger.info(f"[{i+1}/{total_restaurants}] Processing restaurant...")
             
+            # Check if all tokens are exhausted before attempting
+            if len(self.tokens_exhausted) >= len(self.clients):
+                logger.error("ALL TOKENS EXHAUSTED - Stopping scraper")
+                logger.info(f"Collected {len(self.all_reviews)} reviews before running out of credits")
+                break
+            
             reviews = self.scrape_restaurant_reviews(
                 place_url=restaurant['url'],
                 restaurant_name=restaurant['name'],
@@ -258,6 +383,7 @@ class ApifyMultiAccountScraper:
             if (i + 1) % save_interval == 0:
                 self.save_to_csv(f"reviews_progress_{i+1}.csv")
                 logger.info(f"Progress saved: {successful_scrapes} successful, {failed_scrapes} failed")
+                logger.info(f"Tokens exhausted: {len(self.tokens_exhausted)}/{len(self.clients)}")
             
             # Random delay to be respectful to API
             if i < total_restaurants - 1:
@@ -270,6 +396,7 @@ class ApifyMultiAccountScraper:
         logger.info(f"Total reviews collected: {len(self.all_reviews)}")
         logger.info(f"Successful restaurants: {successful_scrapes}/{total_restaurants}")
         logger.info(f"Failed restaurants: {failed_scrapes}/{total_restaurants}")
+        logger.info(f"Tokens exhausted: {len(self.tokens_exhausted)}/{len(self.clients)}")
         logger.info("#" * 60)
         
         return self.all_reviews
@@ -329,20 +456,10 @@ class ApifyMultiAccountScraper:
 
 if __name__ == "__main__":
     
-    # STEP 1: Add your 4 Apify API tokens here
-    # Get tokens from: https://console.apify.com/account/integrations
-    API_TOKENS = [
-        "apify_api_YOUR_TOKEN_1_HERE",  # Account 1
-        "apify_api_YOUR_TOKEN_2_HERE",  # Account 2
-        "apify_api_YOUR_TOKEN_3_HERE",  # Account 3
-        "apify_api_YOUR_TOKEN_4_HERE",  # Account 4
-    ]
+    # STEP 1: Load API tokens from config file
+    from config.personal_tokens import APIFY_TOKENS as API_TOKENS
     
-    # STEP 2: Define your restaurants
-    # Find URLs by going to Google Maps, searching for restaurants,
-    # clicking on them, and copying the URL from your browser
-    
-    # restaurants are in three files (each for different neighborhoods) in rest_data folder. 
+    # STEP 2: Load restaurants from JSON files
     restaurant_files = ["high_income.json", "mid_income.json", "low_income.json"]
     restaurants = []
     for file in restaurant_files:
@@ -359,7 +476,6 @@ if __name__ == "__main__":
     )
     
     # STEP 4: Run the scraper
-    # Target: ~50 restaurants x 50 reviews each = 2,500 reviews
     try:
         reviews = scraper.scrape_multiple_restaurants(
             restaurants=restaurants,
