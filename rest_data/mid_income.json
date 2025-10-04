@@ -1,14 +1,122 @@
 [
   {
-    "url": "https://www.google.com/maps/place/Restaurant+Name/@40.7614,-73.9799,17z/...",
-    "name": "Restaurant Name",
-    "neighborhood": "Upper East Side",
+    "url": "https://maps.app.goo.gl/t2EjSkNnSXBgbhvA7",
+    "name": "Capizzi",
+    "neighborhood": "Hells Kitchen",
     "cuisine_type": "Italian"
   },
   {
-    "url": "https://www.google.com/maps/place/Another+Restaurant/@40.7656,-73.9877,17z/...",
-    "name": "Another Restaurant",
-    "neighborhood": "Upper East Side",
+    "url": "https://maps.app.goo.gl/AHpUNk9tjCeg1Vip6",
+    "name": "Pio Pio 8",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Peruvian"
+  },
+  {
+    "url": "https://maps.app.goo.gl/reNjSdchNGu8FwHR8",
+    "name": "EZ Paella & Tapas",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Spanish"
+  },
+  {
+    "url": "https://maps.app.goo.gl/SiHsf5NncdC61nFQ7",
+    "name": "Buena Vista Restaurant & Bar",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Latin American"
+  },
+  {
+    "url": "https://maps.app.goo.gl/CbYc4Yrf5RCXAVkNA",
+    "name": "IL Punto",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Italian"
+  },
+  {
+    "url": "https://maps.app.goo.gl/mQ89KK2qRiXLGrfq5",
+    "name": "Altair Restaurant NYC",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "American"
+  },
+  {
+    "url": "https://maps.app.goo.gl/srW6eseyqAnCFqLm7",
+    "name": "Pure Thai Cookhouse\n",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Thai"
+  },
+  {
+    "url": "https://maps.app.goo.gl/J4nfXdTyi3jyF91d8",
+    "name": "Chalong Southern Thai\n",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Thai"
+  },
+  {
+    "url": "https://maps.app.goo.gl/PS6PXPeuptYVMGDT9",
+    "name": "Cantina Rooftop",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Mexican"
+  },
+  {
+    "url": "https://maps.app.goo.gl/HFSgzGLkiVpL95A69",
+    "name": "Añejo",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Mexican"
+  },
+  {
+    "url": "https://maps.app.goo.gl/Kda4V9dSJjGNMjdS8",
+    "name": "Kyma Hudson Yards",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Greek"
+  },
+  {
+    "url": "https://maps.app.goo.gl/qBYvzXLggh4EUTG38",
+    "name": "Friedman's",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "American"
+  },
+  {
+    "url": "https://maps.app.goo.gl/BU2wKixm9KYcobg66",
+    "name": "Nizuc",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Mexican"
+  },
+  {
+    "url": "https://maps.app.goo.gl/MiZ8TAgE65mLs6Nc6",
+    "name": "Suram Sushi & Ramen",
+    "neighborhood": "Hells Kitchen",
     "cuisine_type": "Japanese"
+  },
+  {
+    "url": "https://maps.app.goo.gl/mW3Zr4bzvzgWRrZN6",
+    "name": "West Side Steakhouse\n",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Steakhouse"
+  },
+  {
+    "url": "https://maps.app.goo.gl/pvyjS1b8NSno2X537",
+    "name": "Valla Table",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Thai"
+  },
+  {
+    "url": "https://maps.app.goo.gl/b7cV8tpj3KKQfMF16",
+    "name": "Rice x Beans",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Brazilian"
+  },
+  {
+    "url": "https://maps.app.goo.gl/nNJ7hiS6zNuJBak8A",
+    "name": "HaSalon",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Israeli"
+  },
+  {
+    "url": "https://maps.app.goo.gl/EGc4SPNyCGpETaiG6",
+    "name": "Il Melograno",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Italian"
+  },
+  {
+    "url": "https://maps.app.goo.gl/m35FenzSzEHXBc9z9",
+    "name": "Frena",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Meadle Eastern"
   }
 ]
