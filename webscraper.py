@@ -11,7 +11,6 @@ Updated with:
 """
 
 from apify_client import ApifyClient
-from apify_client.exceptions import ApifyApiError
 import pandas as pd
 import json
 import time
@@ -19,6 +18,13 @@ from typing import List, Dict, Optional
 import random
 import logging
 import os
+
+# Apify client may not expose a dedicated ApifyApiError in all versions.
+# To avoid import issues, we use manual error handling: catch general
+# exceptions from the Apify client and inspect their messages to
+# determine if they're credit-related. This keeps the scraper
+# compatible across different apify-client versions.
+ApifyApiError = None
 
 # Configure logging
 logging.basicConfig(
@@ -283,25 +289,35 @@ class ApifyMultiAccountScraper:
                 
                 return reviews_data
                 
-            except ApifyApiError as e:
+            except Exception as e:
+                # The apify client may raise different exception types across
+                # versions. Catch all exceptions here and decide if the error
+                # indicates exhausted credits by inspecting the message.
                 error_msg = str(e)
-                logger.error(f"Apify API error on attempt {attempt + 1}: {error_msg}")
-                
-                # Check if this is a credit exhaustion error
+                logger.error(f"Apify client error on attempt {attempt + 1}: {error_msg}")
+
+                # If this appears to be a credit exhaustion error, mark the
+                # token as exhausted and switch to the next one without
+                # counting this as a retry.
                 if self._is_credit_error(error_msg):
-                    logger.warning(f"Account #{token_index + 1} ran out of credits")
-                    self.tokens_exhausted.add(token_index)
-                    
-                    # Check if we have other tokens available
+                    try:
+                        logger.warning(f"Account #{token_index + 1} ran out of credits")
+                        self.tokens_exhausted.add(token_index)
+                    except Exception:
+                        # Defensive: if token_index isn't available for some
+                        # reason, just log and continue.
+                        logger.warning("Could not mark token as exhausted (token_index unavailable)")
+
+                    # If all tokens are exhausted, stop.
                     if len(self.tokens_exhausted) >= len(self.clients):
                         logger.error("All tokens exhausted - cannot continue")
                         return []
-                    
+
                     logger.info("Switching to next available token...")
-                    # Don't count this as a retry, just try with next token
+                    # Don't count this as a retry; try immediately with next token
                     continue
-                
-                # For other errors, do normal retry logic
+
+                # For other errors, do normal retry/backoff logic
                 if attempt < self.max_retries - 1:
                     wait_time = 2 ** attempt
                     logger.info(f"Retrying in {wait_time} seconds...")
@@ -460,7 +476,8 @@ if __name__ == "__main__":
     from config.personal_tokens import APIFY_TOKENS as API_TOKENS
     
     # STEP 2: Load restaurants from JSON files
-    restaurant_files = ["high_income.json", "mid_income.json", "low_income.json"]
+    #restaurant_files = ["high_income.json", "mid_income.json", "low_income.json"]
+    restaurant_files = ["test.json"]
     restaurants = []
     for file in restaurant_files:
         with open(os.path.join("rest_data", file), 'r', encoding='utf-8') as f:
