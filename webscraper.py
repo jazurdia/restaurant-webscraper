@@ -402,7 +402,7 @@ if __name__ == "__main__":
     from config.personal_tokens import APIFY_TOKENS as API_TOKENS
     
     # STEP 2: Load restaurants from JSON files
-    restaurant_files = ["test.json"]
+    restaurant_files = ["high_income.json", "mid_income.json", "low_income.json"]
     restaurants = []
     for file in restaurant_files:
         with open(os.path.join("rest_data", file), 'r', encoding='utf-8') as f:
