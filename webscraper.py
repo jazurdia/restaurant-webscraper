@@ -421,7 +421,7 @@ if __name__ == "__main__":
     try:
         reviews = scraper.scrape_multiple_restaurants(
             restaurants=restaurants,
-            reviews_per_restaurant=40,
+            reviews_per_restaurant=50,
             delay_between_requests=(2, 5),
             save_interval=5
         )
