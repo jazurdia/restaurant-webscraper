@@ -1,9 +1,33 @@
 [
   {
-    "url": "https://www.google.com/maps/place/Pio+Pio+8/@40.7615062,-74.0059013,15z/data=!4m8!3m7!1s0x89c258520c70f5bd:0x53118c036f1b6ab5!8m2!3d40.7605535!4d-73.9945268!9m1!1b1!16s%2Fg%2F1vl9sdk2?entry=ttu&g_ep=EgoyMDI1MTAwMS4wIKXMDSoASAFQAw%3D%3D",
-    "name": "East Harlem Bottling Co.",
-    "neighborhood": "East Harlem",
-    "cuisine_type": "American"
+    "url": "https://www.google.com/maps/place/EZ+Paella+%26+Tapas/@40.7641426,-74.0011499,16z/data=!4m6!3m5!1s0x89c25950e0009dbd:0xf17fbe0305f0ffdf!8m2!3d40.7636014!4d-73.9886529!16s%2Fg%2F11p73q1d3t?entry=ttu&g_ep=EgoyMDI1MTAwMS4wIKXMDSoASAFQAw%3D%3D",
+    "name": "Capizzi",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Italian"
+  },
+  {
+    "url": "https://www.google.com/maps/place/EZ+Paella+%26+Tapas/@40.7641426,-74.0011499,16z/data=!4m6!3m5!1s0x89c25950e0009dbd:0xf17fbe0305f0ffdf!8m2!3d40.7636014!4d-73.9886529!16s%2Fg%2F11p73q1d3t?entry=ttu&g_ep=EgoyMDI1MTAwMS4wIKXMDSoASAFQAw%3D%3D",
+    "name": "Pio Pio 8",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Peruvian"
+  },
+  {
+    "url": "https://www.google.com/maps/place/EZ+Paella+%26+Tapas/@40.7641426,-74.0011499,16z/data=!4m8!3m7!1s0x89c25950e0009dbd:0xf17fbe0305f0ffdf!8m2!3d40.7636014!4d-73.9886529!9m1!1b1!16s%2Fg%2F11p73q1d3t?entry=ttu&g_ep=EgoyMDI1MTAwMS4wIKXMDSoASAFQAw%3D%3D",
+    "name": "EZ Paella & Tapas",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Spanish"
+  },
+  {
+    "url": "https://www.google.com/maps/place/Buena+Vista+Restaurant+%26+Bar/@40.7568372,-73.9934938,15z/data=!4m8!3m7!1s0x89c25852b433ffff:0x4bde1e9afa756c9b!8m2!3d40.7568372!4d-73.9934938!9m1!1b1!16s%2Fg%2F11fflztctz?entry=ttu&g_ep=EgoyMDI1MTAwMS4wIKXMDSoASAFQAw%3D%3D",
+    "name": "Buena Vista Restaurant & Bar",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Latin American"
+  },
+  {
+    "url": "https://www.google.com/maps/place/IL+Punto/@40.7629484,-74.0130781,15z/data=!4m8!3m7!1s0x89c259ad582054c3:0xcc8b75d6e07de49c!8m2!3d40.756175!4d-73.9946239!9m1!1b1!16s%2Fg%2F1wfcq1fr?entry=ttu&g_ep=EgoyMDI1MTAwMS4wIKXMDSoASAFQAw%3D%3D",
+    "name": "IL Punto",
+    "neighborhood": "Hells Kitchen",
+    "cuisine_type": "Italian"
   }
 
 ]
